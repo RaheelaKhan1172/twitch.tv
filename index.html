@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <div class="container">
+      <div class="row search">
+        <input id="searchinput" type="text"class="form-control"placeholder="Search something!" />
+        <button id="searchbutton" class="btn btn-default"><i id="search" class="fa fa-search"></i> </button>
+      </div>
+        <div class="dropdown">
+          <button id="options" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown"><span id="display">Search by... </span>
+          <span class="caret"></span></button>
+          <ul id="droptarget" class="dropdown-menu">
+            <li><a href="#" id="game">Games</a></li>
+            <li><a href="#" id="gameandchannel">Game &amp; Channel</a></li>
+            <li><a href="#" id="channel">Channel</a></li>
+          </ul>
+      </div>
+    </div>
+    <script src="bower_components/jquery/dist/jquery.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+    <script defer src="main.js"></script>
+    
+  </body>
+</html>

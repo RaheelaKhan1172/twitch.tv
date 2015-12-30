@@ -1,0 +1,36 @@
+
+body {
+  overflow-x:hidden;
+}
+
+
+.container {
+  display:flex;
+  margin-top:-100px;
+  padding-top:100px;
+  position:relative;
+  width:100%;
+  backface-visiblity:hidden;
+  will-change:overflow; 
+}
+
+.container .top {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  z-index:10;
+}
+
+.middle {
+  overflow:auto;
+  height:auto;
+  padding:5rem;
+      -webkit-overflow-scrolling: touch;
+    -ms-overflow-style: none;
+  flex:1;
+}
+.middle::-webkit-scrollbar {
+  display:none;
+}
+

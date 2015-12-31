@@ -1,7 +1,6 @@
 (function(){
   function init() {
     bindEvents();
-    
   };
   
   function bindEvents() {
@@ -41,7 +40,6 @@
     });
 
     apiHandler(input);
-
   };
 
   function apiHandler(input){ 
@@ -65,11 +63,12 @@
   function gameOnlyCall(input) {  
     if (input) {
     $.getJSON('https://api.twitch.tv/kraken/streams?game='+input)
-    .success(function(data){handleResult(data)})
+    .success(function(data){handleGenResult(data)})
     .error(function(data) {handleError(data,input)});
     } else {
-      $.getJSON('https://api.twitch.tv/kraken/streams?game')
-    .success(function(data){handleResult(data)})
+    console.log('hello data');
+    $.getJSON('https://api.twitch.tv/kraken/streams?game')
+    .success(function(data){handleGenResult(data)})
     .error(function(data) {handleError(data)});
     }
   };
@@ -77,34 +76,130 @@
   function channelOnlyCall(input) {
     if (input) {
       $.getJSON('https://api.twitch.tv/kraken/streams?channel='+input)
-      .success(function(data){handleResult(data)})
+      .success(function(data){handleSpecificResult(data,input)})
       .error(function(data) {handleError(data,input)});
     } else {
-      $.getJSON('https://api.twitch.tv/kraken/streams?channel')
-      .success(function(data) {handleResult(data)})
+      $.getJSON('https://api.twitch.tv/kraken/streams/')
+      .success(function(data) {handleGenResult(data)})
       .error(function(data) {handleError(data)});
     }
   };
 
   function gameAndChannel(input) {
      $.getJSON('https://api.twitch.tv/kraken/streams?game='+input[0]+'&channel='+input[1])
-      .success(function(data) {handleResult(data)})
+      .success(function(data) {handleSpecificResult(data,input)})
       .error(function(data) {handleError(data)});
   };
 
   function callApi(input) {
-    $.getJSON('https://api.twitch.tv/kraken/streams/freecodecamp')
-    .success(function(data) {handleResult(data)})
+    $.getJSON('https://api.twitch.tv/kraken/streams/'+input)
+    .success(function(data) {handleSpecificResult(data,input)})
     .error(function() {  console.log('error!')});
   };
 
-  function handleResult(data) {
+  function handleSpecificResult(data,input) {
+    console.log('spec',data,input);
+    if(data._total === 0 || data.stream === null) {
+      handleOffLine(input);
+    } else { //display results
+      console.log(data);
+      isOnline(data); 
+    } 
+  };
+ 
+  function isOnline(data) {
+    var html = "";
+    html += "<div class='row'>";
+    html += "<div class='col-md-6'>";
+    html += "<a href='" + data.streams[0].channel.url + "'>";
+    html += "<img class='img-responsive user' src='" + data.streams[0].channel.logo + "'>"
+    html += "</a>";
+    html += "<h2 class='text'>" + data.streams[0].channel.name + " is online! </h2></div>";
+    html += "<div class='col-md-4'>";
+    html += "<h2 class='text'>" + data.streams[0].channel.name + " is currently playing: " + data.streams[0].game + "</h2>";
+    html += "<img class='img-responsive game' src='" + data.streams[0].preview.medium + "'>";
+    html += "<h3 class='text'>" + data.streams[0].channel.status + "</h3></div> </div>";
+ 
+    $("#message1").html(html);
+  };
+ 
+  function handleOffLine(inp) {
+      console.log(inp);
+      $(".message").text("This user is offline! Would you like to be notified when they are online?");
+      var html = "";
+      html += "<div class='row'>";
+      html += "<div class='col-lg-6'>";
+      html += "<div class='input-group'>";
+      html += "<span class='input-group-btn'>";
+      html += "<button class='btn btn-default' type='button' id='yes'>Yes</button>";
+      html += "<button class='btn btn-default ' type='button' id='no'>No</button>";
+      html += "</span>";
+      html += "</div>";
+      html += "</div>";
+      html += "</div>";
+      $("#message1").append(html);
+      next(inp);
+  };
+
+  function next(inp) {
+    console.log(inp);
+    $("#message1").on('click',function(event) {
+      var ev = event.target.id;
+      if (ev === "yes") {
+        saveOffLine(inp);
+      } else {
+        //refresh page and tell em to seaerch again
+      }
+    });
+  };
+
+  function saveOffLine(inp) {
+    if (!localStorage.getItem('inp')) {
+      localStorage.setItem('inp',inp);
+    }
+    interval();
+  };
+
+  function interval() {
+    var i = 0;
+    console.log(localStorage.length);
+    var arr = [];
+    while ( i < localStorage.length) {
+      arr.push(localStorage.getItem(localStorage.key(i)));
+      i++;
+    };
+    //now 1 minute interval to send the users to api
+  };
+
+  function handleGenResult(data) {
     console.log(data);
     var dataLength = Object.keys(data);
-    for (var prop in data) {
-      console.log(data.streams[0].game);
+    var display = document.getElementById("display").textContent;
+      var html = "";
+      html += "<div class='row'>";
+      html += "<div class='col-lg-12'>";
+      html += "<h1 class='header'>";
+      html += "All " + display;
+      html += "</h1> </div> </div>";
+      var count = 0;
+      html += "<div class='row'>";
+
+    for (var i = 0; i < data.streams.length-1; i++ ) {
+      html += "<div class='col-md-3 col-xs-3'>";
+      html += "<a href='"+ data.streams[i].channel.url + "'>";
+      html += "<img class='img-responsive' alt='' src='"+ data.streams[i].preview.small + "'>";
+      html += "</a>"
+      html += "<h4 class='gamename'>" + data.streams[i].game + "</h4> <h5 class='playername'> Player: " + data.streams[i].channel.display_name + "</h5>" 
+      html += "<h5 class='view'> Total Views: " + data.streams[i].channel.views + "</h5>   </div>";
+      count++; 
+
+      if (count % 3 === 0) {
+        html += "</div> <div class='row'>" 
+      }
     }
-  }
+   $("#message1").html(html); 
+  };
+
 
 
   init();

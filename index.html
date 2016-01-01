@@ -9,13 +9,14 @@
     <link rel="stylesheet" href="style.css">
   </head>
   <body>
-    <div class="container">
-      <div class="top">
-      <div class="row search">
-        <input id="searchinput" type="text"class="form-control"placeholder="Search something!" />
-        <button id="searchbutton" class="btn btn-default"><i id="search" class="fa fa-search"></i> </button>
-      </div>
-        <div class="dropdown">
+      <div class="navbar navbar-left navbar-fixed-top" role="navigation">
+      <div class="container">
+      <div id="bs-example-navbar-collapse-1" class='collapse navbar-collapse'>
+      <ul class='nav navbar-nav'>
+            <li> <button id="searchbutton" class="btn btn-default"><i id="search" class="fa fa-search"></i> </button></li>
+
+    <li>   <input id="searchinput" type="text"class="form-control"placeholder="Search something!" /> </li>
+      <li>  <div class="dropdown">
           <button id="options" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown"><span id="display">Search by... </span>
           <span class="caret"></span></button>
           <ul id="droptarget" class="dropdown-menu">
@@ -23,13 +24,16 @@
             <li><a href="#" id="gameandchannel">Game &amp; Channel</a></li>
             <li><a href="#" id="channel">Channel</a></li>
           </ul>
+          </li>
+          </ul>
+      </div>
+      </div>
       </div>
       </div>
       <div class="middle">
         <div class="message"></div>
         <div id="message1"></div>
       </div>
-    </div><!-- end container -->
     <script src="bower_components/jquery/dist/jquery.js"></script>
     <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
     <script defer src="main.js"></script>

@@ -1,5 +1,7 @@
 (function(){
   function init() {
+    document.getElementById("searchinput").value = "";
+    document.getElementById("searchinput").placeholder = "Search";
     bindEvents();
   };
   
@@ -12,8 +14,18 @@
         $("#display").text(option);
         if (option === "Game & Channel") {
           document.getElementById('searchinput').placeholder = "Game name, channel";
+        } else {
+          document.getElementById('searchinput').placeholder = 'Search specific ' + option.toLowerCase();
         }
       });
+    });
+   $("#menu-link-2").click(function() {
+    $("#slide-1").hide();
+    $("#slide-2").show();
+    });
+   $("#menu-link-1").click(function() {
+      $("#slide-2").hide();
+      $("#slide-1").show();
     });
    $("#searchbutton").click(handleClick);
   };
@@ -56,7 +68,11 @@
         channelOnlyCall(input);
         break;
       default:
-        callApi(input);
+        var query = document.getElementById("searchinput").value;
+        if (query) {
+          console.log(' yo search here');
+          callApi(input);
+        }
       }    
   };
 
@@ -93,6 +109,7 @@
   };
 
   function callApi(input) {
+    console.log('second');
     $.getJSON('https://api.twitch.tv/kraken/streams/'+input)
     .success(function(data) {handleSpecificResult(data,input)})
     .error(function() {  console.log('error!')});
@@ -112,7 +129,20 @@
     var html = "";
     html += "<div class='row'>";
     html += "<div class='col-md-4'>";
-    var i = 0;  
+    if (data.stream.length === undefined) {
+      for (var i = 0;i< 1 ; i++) {
+        console.log(data.stream);
+        html += "<a href='" + data.stream.channel.url + "'>";
+        html += "<img class='img-responsive user' src='" + data.stream.channel.logo + "'>";
+        html += "</a>";
+        html += "<h2 class='text'>" + data.stream.channel.name + " is online! </h2></div>";
+        html += "<div class='col-md-4'>";
+        html += "<h2 class='text'>" + data.stream.channel.name + " is playing: " + data.stream.game + "</h2>";
+        html += "<img class='img-responsive game' src='" + data.stream.preview.medium + "'>";
+        html += "<h3 class='text'>" + data.stream.channel.status + "</h3></div></div>";
+      }
+    } else {
+    var i = 0; 
     while ( i < data.streams.length) {
       html += "<a href='" + data.streams[i].channel.url + "'>";
       html += "<img class='img-responsive user' src='" + data.streams[i].channel.logo + "'>"
@@ -123,8 +153,9 @@
       html += "<img class='img-responsive game' src='" + data.streams[i].preview.medium + "'>";
       html += "<h3 class='text'>" + data.streams[i].channel.status + "</h3></div> </div>";
       i++;
+    };
     }
-    $("#message1").html(html);
+    $("#message1").append(html);
   };
  
   function handleOffLine(inp) {
@@ -141,10 +172,10 @@
       html += "</div>";
       html += "</div>";
       html += "</div>";
-      $("#message1").append(html);
+      $("#message1").html(html);
       next(inp);
   };
-
+  //update display
   function next(inp) {
     console.log(inp);
     $("#message1").on('click',function(event) {
@@ -152,41 +183,91 @@
       if (ev === "yes") {
         saveOffLine(inp);
       } else {
-        //refresh page and tell em to seaerch again
+        $(".message").html('Got it!');
+        $("#message1").html("");
+        document.getElementById("searchinput").value = "";
+        document.getElementById("searchinput").placeholder = "Search";
+       setTimeout(function() {
+
+        $(".message").fadeOut("slow");
+      },2000);
       }
     });
   };
 
   function saveOffLine(inp) {
-    if (!localStorage.getItem('inp')) {
-      localStorage.setItem('inp',inp);
+    if (!localStorage.getItem(inp)) {
+      localStorage.setItem(inp,inp);
     }
+    updateDisplay(inp) 
     interval();
   };
 
   function interval() {
     var i = 0;
-    console.log(localStorage.length);
     var arr = [];
     while ( i < localStorage.length) {
       arr.push(localStorage.getItem(localStorage.key(i)));
       i++;
     };
-    setInterval(function() {
-      $.getJSON('https://api.twitch.tv/kraken/streams/'+arr)
-       .success(function(data) { newResultFromInterval(data)}); 
-    },2000);
+    var html = "";
+    console.log(arr);
+    var inte = setInterval(function() {
+      arr.forEach(function(a) {
+      $.getJSON('https://api.twitch.tv/kraken/streams?channel='+a,function(data) {
+        //remember to change this to not online and 
+        if (data._total !== 0) {
+          html += "<div class='alert alert-success fade in'>" + a + " is online!</div>";
+          $(".navbar-right").html(html);
+          localStorage.removeItem(a);
+          var ind = arr.indexOf(a);
+          arr.splice(ind,1);
+          updateDisplay(data)
+          $(".navbar-right").fadeOut(6000);
+        }
+      }); 
+      });
+      
+    },1000);
    };
+
+  function updateDisplay(data) {
+  // add click to main init 
+  $("#menu-link-2").click(function() {
+  if (typeof data !== Object) {
+    console.log('hihisdffs',data);
+    var html = "";
+    html += "<span>" + data + "</span>"
+    html += "<div class='col-md-4-col-xs-4'><span class='stat'> offline</span></div>";
+    $('#data').append(html);
+  } else { 
+    var html = ""; 
+    for (var i = 0;i< 1 ; i++) {
+     html += "<a href='" + data.stream.channel.url + "'>";
+     html += "<img class='img-responsive user' src='" + data.stream.channel.logo + "'>";
+     html += "</a>";
+     html += "<h2 class='text'>" + data.stream.channel.name + " is online! </h2></div>";
+     html += "<div class='col-md-4'>";
+     html += "<h2 class='text'>" + data.stream.channel.name + " is playing: " + data.stream.game + "</h2>";
+     html += "<img class='img-responsive game' src='" + data.stream.preview.medium + "'>";
+     html += "<h3 class='text'>" + data.stream.channel.status + "</h3></div></div>";
+    $("#data").append(html);
+    } 
+    }
+  });
+  } 
   
   function newResultFromInterval(data) {
-    console.log(data);
-    if ( data.stream !== null ) {
-      
+    console.log('hihi',data,Array.isArray(data));
+    if ( data._total ===  0 ) {
+      var html = "";
+      html += "<div class='alert'> still offline!</div>"; 
     }
+    $("#message1").append(html);
   };
 
   function handleGenResult(data) {
-    console.log(data);
+
     var dataLength = Object.keys(data);
     var display = document.getElementById("display").textContent;
       var html = "";
@@ -211,10 +292,12 @@
         html += "</div> <div class='row'>" 
       }
     }
-   $("#message1").html(html); 
+   $("#message1").append(html); 
   };
-
-
+  
+  function handleError(data) {
+    $(".message").text('No results found!');
+  };
 
   init();
 })();

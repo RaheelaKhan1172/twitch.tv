@@ -86,7 +86,8 @@
   };
 
   function gameAndChannel(input) {
-     $.getJSON('https://api.twitch.tv/kraken/streams?game='+input[0]+'&channel='+input[1])
+     var first = input.shift();
+     $.getJSON('https://api.twitch.tv/kraken/streams?game='+first+'&channel='+input)
       .success(function(data) {handleSpecificResult(data,input)})
       .error(function(data) {handleError(data)});
   };
@@ -110,16 +111,19 @@
   function isOnline(data) {
     var html = "";
     html += "<div class='row'>";
-    html += "<div class='col-md-6'>";
-    html += "<a href='" + data.streams[0].channel.url + "'>";
-    html += "<img class='img-responsive user' src='" + data.streams[0].channel.logo + "'>"
-    html += "</a>";
-    html += "<h2 class='text'>" + data.streams[0].channel.name + " is online! </h2></div>";
     html += "<div class='col-md-4'>";
-    html += "<h2 class='text'>" + data.streams[0].channel.name + " is currently playing: " + data.streams[0].game + "</h2>";
-    html += "<img class='img-responsive game' src='" + data.streams[0].preview.medium + "'>";
-    html += "<h3 class='text'>" + data.streams[0].channel.status + "</h3></div> </div>";
- 
+    var i = 0;  
+    while ( i < data.streams.length) {
+      html += "<a href='" + data.streams[i].channel.url + "'>";
+      html += "<img class='img-responsive user' src='" + data.streams[i].channel.logo + "'>"
+      html += "</a>";
+      html += "<h2 class='text'>" + data.streams[i].channel.name + " is online! </h2></div>";
+      html += "<div class='col-md-4'>";
+      html += "<h2 class='text'>" + data.streams[i].channel.name + " is currently playing: " + data.streams[i].game + "</h2>";
+      html += "<img class='img-responsive game' src='" + data.streams[i].preview.medium + "'>";
+      html += "<h3 class='text'>" + data.streams[i].channel.status + "</h3></div> </div>";
+      i++;
+    }
     $("#message1").html(html);
   };
  
@@ -168,7 +172,17 @@
       arr.push(localStorage.getItem(localStorage.key(i)));
       i++;
     };
-    //now 1 minute interval to send the users to api
+    setInterval(function() {
+      $.getJSON('https://api.twitch.tv/kraken/streams/'+arr)
+       .success(function(data) { newResultFromInterval(data)}); 
+    },2000);
+   };
+  
+  function newResultFromInterval(data) {
+    console.log(data);
+    if ( data.stream !== null ) {
+      
+    }
   };
 
   function handleGenResult(data) {

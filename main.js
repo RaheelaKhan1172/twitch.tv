@@ -3,8 +3,10 @@
     document.getElementById("searchinput").value = "";
     document.getElementById("searchinput").placeholder = "Search";
     bindEvents();
+    updateOffLineSave();
   };
-  
+
+  var users = []; 
   function bindEvents() {
     var option = "";
     $("#options").click(function() {
@@ -20,10 +22,14 @@
       });
     });
    $("#menu-link-2").click(function() {
+    $("#menu-link-2").addClass('active');
+    $("#menu-link-1").removeClass('active');
     $("#slide-1").hide();
     $("#slide-2").show();
     });
    $("#menu-link-1").click(function() {
+      $("#menu-link-1").addClass('active');
+      $("#menu-link-2").removeClass('active');
       $("#slide-2").hide();
       $("#slide-1").show();
     });
@@ -128,21 +134,27 @@
   function isOnline(data) {
     var html = "";
     html += "<div class='row'>";
-    html += "<div class='col-md-4'>";
-    if (data.stream.length === undefined) {
+    html += "<div class='col-md-2 col-xs-2'>";
+    console.log(data);
+    if (data.stream !== undefined) {
+      console.log('aw!');
       for (var i = 0;i< 1 ; i++) {
-        console.log(data.stream);
-        html += "<a href='" + data.stream.channel.url + "'>";
-        html += "<img class='img-responsive user' src='" + data.stream.channel.logo + "'>";
-        html += "</a>";
-        html += "<h2 class='text'>" + data.stream.channel.name + " is online! </h2></div>";
-        html += "<div class='col-md-4'>";
-        html += "<h2 class='text'>" + data.stream.channel.name + " is playing: " + data.stream.game + "</h2>";
-        html += "<img class='img-responsive game' src='" + data.stream.preview.medium + "'>";
-        html += "<h3 class='text'>" + data.stream.channel.status + "</h3></div></div>";
+     html += "<a href='" + data.stream.channel.url + "'>";
+     html += "<img class='img-responsive user' src='" + data.stream.channel.logo + "'>";
+     html += "</a>";
+     html += "</div>";
+     html += "<div class='col-md-2 col-xs-2'>";
+     html += "<h2 class='text'>" + data.stream.channel.name + " is online! </h2></div>";
+     html += "<div class='col-md-2 col-xs-2'>";
+     html += "<h2 class='text'>" + data.stream.channel.name + " is playing: " + data.stream.game + "</h2>";
+     html += "</div>";
+     html += "<div class='col-md-2 col-xs-2'>";
+     html += "<img class='img-responsive game' src='" + data.stream.preview.medium + "'>";
+     html += "<h3 class='text'>" + data.stream.channel.status + "</h3></div>";
       }
     } else {
-    var i = 0; 
+    var i = 0;
+    //data streams i 
     while ( i < data.streams.length) {
       html += "<a href='" + data.streams[i].channel.url + "'>";
       html += "<img class='img-responsive user' src='" + data.streams[i].channel.logo + "'>"
@@ -160,6 +172,7 @@
  
   function handleOffLine(inp) {
       console.log(inp);
+      $(".message").fadeIn();
       $(".message").text("This user is offline! Would you like to be notified when they are online?");
       var html = "";
       html += "<div class='row'>";
@@ -173,14 +186,19 @@
       html += "</div>";
       html += "</div>";
       $("#message1").html(html);
+      $("#message1").fadeIn();
       next(inp);
   };
   //update display
-  function next(inp) {
+  function next(inp){
     console.log(inp);
     $("#message1").on('click',function(event) {
       var ev = event.target.id;
       if (ev === "yes") {
+        setTimeout(function() {
+          $(".message").fadeOut("slow");
+          $("#message1").fadeOut("slow");
+        },2000);
         saveOffLine(inp);
       } else {
         $(".message").html('Got it!');
@@ -196,30 +214,83 @@
   };
 
   function saveOffLine(inp) {
+    console.log(inp,'im inp');
+    if (localStorage.getItem(inp)) {
+      (console.log('why?'));
+      $(".message").fadeIn();
+      $(".message").text("You are already following this user!");
+      $(".message").fadeOut("slow");
+    } else {
     if (!localStorage.getItem(inp)) {
       localStorage.setItem(inp,inp);
+          updateOffLineSave()
     }
-    updateDisplay(inp) 
+    }
     interval();
+  };
+
+  function updateOffLineSave() {
+    var html = "";
+    var i = 0;
+    console.log(users);
+    while (i < localStorage.length) {
+      if (users.indexOf(localStorage.getItem(localStorage.key(i))) === -1) {
+        console.log('mhm',users, localStorage.getItem(localStorage.key(i)));
+        users.push(localStorage.getItem(localStorage.key(i)));
+      }
+      i++;
+    }
+    users.forEach(function(a,i) {
+    console.log('woop!',i,users);
+    html += "<div id ='row-"+i+"' class='row'>";
+      html += "<div span class='col-md-2 col-xs-2'>";
+      html += "<p id='user-"+i+"'>" + a + "</p></div>";
+      html += "<div class='col-md-2 col-xs-2'><span class='stat'> offline</span></div></div>";
+      $('#data').html(html);
+    });
+    users.forEach(function(a,i) {
+    $.getJSON('https://api.twitch.tv/kraken/streams/'+a,function(data) {
+    console.log(data,i);
+    if (data._total !== 0 && data.stream !== null) {
+      console.log('yay!');
+      html += "<div class='col-md-2 col-xs-2'>";
+      html += "<a href='" + data.stream.channel.url + "'>";
+      html += "<img class='img-responsive user' src='" + data.stream.channel.logo + "'>";
+      html += "</a>";
+      html += "</div>"
+      $("#row-"+i).prepend(html);
+      document.getElementsByClassName('stat')[i].textContent = "online!";
+      html += "<div class='col-md-2 col-xs-2'>";
+      html += "<p class='text'>" + data.stream.channel.name + " playing: " + data.stream.game + "</p>";
+      html += "</div>";
+      $("#row-"+i).append(html); 
+      }
+      }); 
+    });
   };
 
   function interval() {
     var i = 0;
     var arr = [];
-    while ( i < localStorage.length) {
+    while (i < localStorage.length) {
       arr.push(localStorage.getItem(localStorage.key(i)));
       i++;
     };
+    startInterval(arr);
+  };
+
+  function startInterval(arr) {
     var html = "";
     console.log(arr);
     var inte = setInterval(function() {
       arr.forEach(function(a) {
-      $.getJSON('https://api.twitch.tv/kraken/streams?channel='+a,function(data) {
+      $.getJSON('https://api.twitch.tv/kraken/streams/'+a,function(data) {
+        console.log(arr);
         //remember to change this to not online and 
-        if (data._total !== 0) {
+        if (data._total !== 0 && data.stream !== null ) {
+        console.log(arr);
           html += "<div class='alert alert-success fade in'>" + a + " is online!</div>";
           $(".navbar-right").html(html);
-          localStorage.removeItem(a);
           var ind = arr.indexOf(a);
           arr.splice(ind,1);
           updateDisplay(data)
@@ -228,34 +299,41 @@
       }); 
       });
       
-    },1000);
+    },30000);
    };
 
-  function updateDisplay(data) {
-  // add click to main init 
-  $("#menu-link-2").click(function() {
-  if (typeof data !== Object) {
-    console.log('hihisdffs',data);
-    var html = "";
-    html += "<span>" + data + "</span>"
-    html += "<div class='col-md-4-col-xs-4'><span class='stat'> offline</span></div>";
-    $('#data').append(html);
-  } else { 
+  function updateDisplay(data,arr) {
+    
     var html = ""; 
     for (var i = 0;i< 1 ; i++) {
+     if (arr.indexOf(document.getElementById('user-'+i).textContent) !== -1) {
+      html += "<div class='col-md-2 col-xs-2'>";
+      html += "<a href='" + data.stream.channel.url + "'>";
+      html += "<img class='img-responsive user' src='" + data.stream.channel.logo + "'>";
+      html += "</a>";
+      html += "</div>"
+      document.getElementsByClassName('stat')[i].textContent = 'online!';
+      html += "<div class='col-md-2 col-xs-2'>";
+      html += "<p class='text'>" + data.stream.channel.name + " playing: " + data.stream.game + "</p>";
+      html += "</div>";
+      $("#row-"+i).append(html);
+     }
+  /*   html += "<div class='col-md-2 col-xs-2'>";
      html += "<a href='" + data.stream.channel.url + "'>";
      html += "<img class='img-responsive user' src='" + data.stream.channel.logo + "'>";
      html += "</a>";
+     html += "</div>";
+     html += "<div class='col-md-2 col-xs-2'>";
      html += "<h2 class='text'>" + data.stream.channel.name + " is online! </h2></div>";
-     html += "<div class='col-md-4'>";
+     html += "<div class='col-md-2 col-xs-2'>";
      html += "<h2 class='text'>" + data.stream.channel.name + " is playing: " + data.stream.game + "</h2>";
+     html += "</div>";
+     html += "<div class='col-md-2 col-xs-2'>";
      html += "<img class='img-responsive game' src='" + data.stream.preview.medium + "'>";
-     html += "<h3 class='text'>" + data.stream.channel.status + "</h3></div></div>";
-    $("#data").append(html);
-    } 
+     html += "</div>";
+    $("#data").prepend(html);  */
     }
-  });
-  } 
+  }; 
   
   function newResultFromInterval(data) {
     console.log('hihi',data,Array.isArray(data));
@@ -271,10 +349,10 @@
     var dataLength = Object.keys(data);
     var display = document.getElementById("display").textContent;
       var html = "";
+      html += "All " + display;
       html += "<div class='row'>";
       html += "<div class='col-lg-12'>";
       html += "<h1 class='header'>";
-      html += "All " + display;
       html += "</h1> </div> </div>";
       var count = 0;
       html += "<div class='row'>";
@@ -292,7 +370,8 @@
         html += "</div> <div class='row'>" 
       }
     }
-   $("#message1").append(html); 
+   $("#message1").fadeIn();
+   $("#message1").html(html); 
   };
   
   function handleError(data) {

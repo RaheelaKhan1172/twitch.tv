@@ -37,6 +37,10 @@
   };
 
   function handleClick() {
+    $("#slide-2").hide();
+    $("#slide-1").show();
+      $("#menu-link-1").addClass('active');
+      $("#menu-link-2").removeClass('active');
     var inp = document.getElementById("searchinput").value
     if(inp) {
       fixFormat(inp);
@@ -134,7 +138,7 @@
   function isOnline(data) {
     var html = "";
     html += "<div class='row'>";
-    html += "<div class='col-md-2 col-xs-2'>";
+    html += "<div class='col-md-8 col-xs-8'>";
     console.log(data);
     if (data.stream !== undefined) {
       console.log('aw!');
@@ -143,19 +147,23 @@
      html += "<img class='img-responsive user' src='" + data.stream.channel.logo + "'>";
      html += "</a>";
      html += "</div>";
-     html += "<div class='col-md-2 col-xs-2'>";
-     html += "<h2 class='text'>" + data.stream.channel.name + " is online! </h2></div>";
-     html += "<div class='col-md-2 col-xs-2'>";
-     html += "<h2 class='text'>" + data.stream.channel.name + " is playing: " + data.stream.game + "</h2>";
+     html += "<div class='row'>";
+     html += "<div class='col-md-4 col-xs-2'>";
+     html += "<span class='text'>" + data.stream.channel.name + " is online! </span></div>";
      html += "</div>";
-     html += "<div class='col-md-2 col-xs-2'>";
-     html += "<img class='img-responsive game' src='" + data.stream.preview.medium + "'>";
-     html += "<h3 class='text'>" + data.stream.channel.status + "</h3></div>";
+     html += "<div class='row'>";
+     html += "<div class='col-md-4 col-xs-2'>";
+     html += "<span class='text'>" + data.stream.channel.name + " is playing: " + data.stream.game + "</span>";
+     html += "</div>";
+     html += "<div class='col-md-4 col-xs-2'>";
+     html += "<a href='" + data.stream.channel.url + "'>";
+     html += "<img class='img-responsive game' src='" + data.stream.preview.medium + "'></a>";
+     html += "<span class='text'>'" + data.stream.channel.status + "'</span></div></div>";
       }
     } else {
     var i = 0;
     //data streams i 
-    while ( i < data.streams.length) {
+    while (i < data.streams.length) {
       html += "<a href='" + data.streams[i].channel.url + "'>";
       html += "<img class='img-responsive user' src='" + data.streams[i].channel.logo + "'>"
       html += "</a>";
@@ -235,7 +243,7 @@
     console.log(users);
     while (i < localStorage.length) {
       if (users.indexOf(localStorage.getItem(localStorage.key(i))) === -1) {
-        console.log('mhm',users, localStorage.getItem(localStorage.key(i)));
+        console.log('hm',users, localStorage.getItem(localStorage.key(i)));
         users.push(localStorage.getItem(localStorage.key(i)));
       }
       i++;
@@ -349,7 +357,7 @@
     var dataLength = Object.keys(data);
     var display = document.getElementById("display").textContent;
       var html = "";
-      html += "All " + display;
+      html += "<h4>All " + display + "</h4>";
       html += "<div class='row'>";
       html += "<div class='col-lg-12'>";
       html += "<h1 class='header'>";

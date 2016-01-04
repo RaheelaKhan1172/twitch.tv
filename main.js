@@ -8,11 +8,13 @@
 
   var users = []; 
   function bindEvents() {
+
     var option = "";
     $("#options").click(function() {
       document.getElementById('droptarget').addEventListener('click',function(event) {
         option = event.target.textContent;
         console.log(option);
+
         $("#display").text(option);
         if (option === "Game & Channel") {
           document.getElementById('searchinput').placeholder = "Game name, channel";
@@ -137,21 +139,18 @@
  
   function isOnline(data) {
     var html = "";
-    html += "<div class='row'>";
+    html += "<div class='row rowtop'>";
     html += "<div class='col-md-8 col-xs-8'>";
     console.log(data);
     if (data.stream !== undefined) {
       console.log('aw!');
       for (var i = 0;i< 1 ; i++) {
+     html += "<span class='textstatus'>" + data.stream.channel.name + " is online! </span>";
      html += "<a href='" + data.stream.channel.url + "'>";
      html += "<img class='img-responsive user' src='" + data.stream.channel.logo + "'>";
      html += "</a>";
-     html += "</div>";
-     html += "<div class='row'>";
-     html += "<div class='col-md-4 col-xs-2'>";
-     html += "<span class='text'>" + data.stream.channel.name + " is online! </span></div>";
-     html += "</div>";
-     html += "<div class='row'>";
+     html += "</div></div>";
+     html += "<div class='row rowbottom'>";
      html += "<div class='col-md-4 col-xs-2'>";
      html += "<span class='text'>" + data.stream.channel.name + " is playing: " + data.stream.game + "</span>";
      html += "</div>";
@@ -203,6 +202,7 @@
     $("#message1").on('click',function(event) {
       var ev = event.target.id;
       if (ev === "yes") {
+        $(".message").text("We'll let you know when they are online!");
         setTimeout(function() {
           $(".message").fadeOut("slow");
           $("#message1").fadeOut("slow");
@@ -249,29 +249,28 @@
       i++;
     }
     users.forEach(function(a,i) {
-    console.log('woop!',i,users);
-    html += "<div id ='row-"+i+"' class='row'>";
-      html += "<div span class='col-md-2 col-xs-2'>";
-      html += "<p id='user-"+i+"'>" + a + "</p></div>";
-      html += "<div class='col-md-2 col-xs-2'><span class='stat'> offline</span></div></div>";
-      $('#data').html(html);
-    });
-    users.forEach(function(a,i) {
     $.getJSON('https://api.twitch.tv/kraken/streams/'+a,function(data) {
     console.log(data,i);
     if (data._total !== 0 && data.stream !== null) {
       console.log('yay!');
+      html += "<div id ='row-"+i+"' class='row'>";
       html += "<div class='col-md-2 col-xs-2'>";
-      html += "<a href='" + data.stream.channel.url + "'>";
+      html += "<a href='" + data.stream.channel.url + "'></div>";
       html += "<img class='img-responsive user' src='" + data.stream.channel.logo + "'>";
       html += "</a>";
       html += "</div>"
       $("#row-"+i).prepend(html);
       document.getElementsByClassName('stat')[i].textContent = "online!";
       html += "<div class='col-md-2 col-xs-2'>";
-      html += "<p class='text'>" + data.stream.channel.name + " playing: " + data.stream.game + "</p>";
+      html += "<span class='text'>" + data.stream.channel.name + " playing: " + data.stream.game + "</span>";
       html += "</div>";
       $("#row-"+i).append(html); 
+      } else {
+       html += "<div id ='row-"+i+"' class='row'>";
+      html += "<div span class='col-md-2 col-xs-2'>";
+      html += "<p id='user-"+i+"'>" + a + "</p></div>";
+      html += "<div class='col-md-2 col-xs-2'><span class='stat'> offline</span></div></div>";
+      $('#data').html(html);
       }
       }); 
     });

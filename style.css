@@ -59,7 +59,7 @@ a:active {
  border-outline:0;
 }
 .active {
-  color:#333;
+  color:pink;
   opacity:0.5;
 }
 .row {
@@ -67,11 +67,6 @@ a:active {
     margin-right: -15px;
 }
 
-.col-lg-12 {
-  padding:30px;
-  margin-top:20px;
-  height:4px;
-}
 
 .navbar-default {
   opacity:0.7;
@@ -96,4 +91,16 @@ a:active {
 .user {
   margin-bottom:10px;
 
+}
+.rowtop {
+  margin-top:60px;
+
+}
+.title-row {
+  margin-top:60px;
+}
+
+.col-md-3 {
+  border-right: 1px solid silver;
+  top: 50%;
 }
